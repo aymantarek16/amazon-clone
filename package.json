@@ -26,6 +26,7 @@
     "firebase-admin": "^13.6.0",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.473.0",
+    "micro": "^10.0.1",
     "next": "15.2.3",
     "next-auth": "^5.0.0-beta.25",
     "react": "^19.0.0",
@@ -40,6 +41,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/micro": "^7.3.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
