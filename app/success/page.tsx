@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { store } from "@/lib/store";
@@ -9,25 +9,24 @@ import { db } from "@/lib/firebase";
 import { toast } from "react-hot-toast";
 
 const SuccessPage = () => {
-  const searchParams = new URLSearchParams(window.location.search);
-  const sessionId = searchParams.get("session_id");
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const router = useRouter();
   const resetCart = store((state) => state.resetCart);
-  // const { data: session } = useSession();
 
-  // Prevent double execution under Strict Mode
   const hasRun = useRef(false);
 
   useEffect(() => {
-    if (hasRun.current) return;
+    // Get sessionId safely on client
+    const params = new URLSearchParams(window.location.search);
+    setSessionId(params.get("session_id"));
+  }, []);
+
+  useEffect(() => {
+    if (!sessionId || hasRun.current) return;
     hasRun.current = true;
 
     const handleSuccess = async () => {
-    
-
-      // Redirect if missing info
-      if (!sessionId) {
-        // Show success toast
+      if (sessionId) {
         toast.success("Payment received successfully!");
         return router.push("/");
       }
@@ -40,7 +39,6 @@ const SuccessPage = () => {
 
         const email = encodeURIComponent(stripeSession.customer_email);
 
-        // Save order to Firestore
         await addDoc(collection(db, "users", email, "orders"), {
           amount: stripeSession.amount_total / 100,
           amountShipping: stripeSession.amount_shipping / 100 || 0,
@@ -61,7 +59,7 @@ const SuccessPage = () => {
     };
 
     handleSuccess();
-  }, [router, resetCart, sessionId]);
+  }, [sessionId, router, resetCart]);
 
   return (
     <div className="min-h-screen w-full flex justify-center items-center bg-gradient-to-br from-[#e8ecf3] to-[#cdd5df] px-4 py-10 relative overflow-hidden">
@@ -70,7 +68,6 @@ const SuccessPage = () => {
       <div className="absolute bottom-10 right-10 w-56 h-56 rounded-full bg-gradient-to-br from-blue-300 to-blue-600 blur-3xl opacity-40 animate-pulse"></div>
 
       <div className="relative bg-white/70 backdrop-blur-2xl shadow-[0_8px_50px_rgba(0,0,0,0.20)] rounded-[35px] p-12 max-w-2xl w-full text-center border border-white/30 animate-[fadeIn_.9s_ease-out]">
-        {/* Success Icon */}
         <div className="mb-10 animate-[scaleIn_.7s_ease-out]">
           <div className="w-28 h-28 mx-auto flex items-center justify-center rounded-full bg-green-100 shadow-xl border border-green-300">
             <svg
@@ -81,11 +78,7 @@ const SuccessPage = () => {
               strokeWidth={2}
               stroke="currentColor"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4.5 12.75l6 6L19.5 6"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6L19.5 6" />
             </svg>
           </div>
         </div>
@@ -111,7 +104,6 @@ const SuccessPage = () => {
         </div>
       </div>
 
-      {/* Animations */}
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(20px); }
