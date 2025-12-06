@@ -9,7 +9,10 @@ if (!serviceAccountKey) {
   );
 }
 
+// parse JSON
 const serviceAccount = JSON.parse(serviceAccountKey);
+
+serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
 
 if (!getApps().length) {
   admin.initializeApp({
