@@ -1,18 +1,15 @@
 import { getApps } from "firebase-admin/app";
 import admin from "firebase-admin";
 
-const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-
-if (!serviceAccountKey) {
+if (!process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
   throw new Error(
     "❌ FIREBASE_SERVICE_ACCOUNT_KEY is not defined in the environment variables."
   );
 }
 
-// parse JSON
-const serviceAccount = JSON.parse(serviceAccountKey);
-
-serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+const serviceAccount = JSON.parse(
+  process.env.FIREBASE_SERVICE_ACCOUNT_KEY.replace(/\\n/g, '\n')
+);
 
 if (!getApps().length) {
   admin.initializeApp({
@@ -20,6 +17,4 @@ if (!getApps().length) {
   });
 }
 
-const adminDB = admin.firestore();
-
-export { adminDB };
+export const adminDB = admin.firestore();
