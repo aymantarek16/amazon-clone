@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# build
+.next/
+out/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# firebase
+firebase-debug.log
+firebase-debug.*
+firestore.indexes.json
+firestore.rules
+clone-3c0a1-firebase-adminsdk-fbsvc-6174503264.json
+
+# misc
+.DS_Store
+*.log
+*.rar
