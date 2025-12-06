@@ -1,32 +1,27 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import stripe from '@/lib/stripe';
 import { adminDB } from '@/firebase-admin';
-import { buffer } from 'micro';
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+export async function POST(req: NextRequest) {
+  const body = await req.text();
+  const headersList = await headers();
+  const sig = headersList.get('stripe-signature');
 
-export async function POST(req: any) {
-  const buf = await buffer(req);
-  const body = buf.toString('utf-8');
-
-  const sig = req.headers['stripe-signature'];
   if (!sig) {
     return NextResponse.json({ error: 'No Signature' }, { status: 400 });
   }
 
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
   if (!webhookSecret) {
     console.log('Stripe webhook secret is not set');
     return NextResponse.json({ error: 'Stripe webhook secret is not set' }, { status: 400 });
   }
 
   let event: Stripe.Event;
+
   try {
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (error) {
@@ -34,10 +29,15 @@ export async function POST(req: any) {
     return NextResponse.json({ error: `Webhook Error: ${error}` }, { status: 400 });
   }
 
+  // Handle checkout.session.completed event
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
 
+    //==============================
+    //  Get Real Email
+    //==============================
     let userEmail = session.customer_email;
+
     if (!userEmail && session.customer) {
       const customer = await stripe.customers.retrieve(session.customer as string);
       if (!customer.deleted && customer.email) {
@@ -46,12 +46,17 @@ export async function POST(req: any) {
     }
 
     if (!userEmail) {
-      console.error('❌ No email found for this session!');
-      return NextResponse.json({ error: 'No email found' }, { status: 400 });
+      console.error("❌ No email found for this session!");
+      return NextResponse.json({ error: "No email found" }, { status: 400 });
     }
 
-    const safeUserId = userEmail.replace(/[.#$/[\]]/g, '_');
+    //==============================
+    // Firestore-safe ID
+    //==============================
+    const safeUserId = userEmail.replace(/[.#$/[\]]/g, "_");
 
+
+    // Get invoice details
     const invoice = session.invoice
       ? await stripe.invoices.retrieve(session.invoice as string)
       : null;
@@ -63,10 +68,12 @@ export async function POST(req: any) {
     };
 
     try {
+      // Get line items with product details
       const lineItemsWithProduct = await stripe.checkout.sessions.listLineItems(session.id, {
         expand: ['data.price.product'],
       });
 
+      // Map session products
       const sessionProducts =
         lineItemsWithProduct?.data?.map((item) => ({
           id: item.id,
@@ -76,18 +83,23 @@ export async function POST(req: any) {
           price: (item.price?.unit_amount as number) / 100,
         })) || [];
 
+      // Calculate total amount
       const totalAmount =
         lineItemsWithProduct?.data?.reduce(
           (total, item) => total + (item.amount_total as number) / 100,
           0
         ) || 0;
 
+      // Create order item for Firebase
       const orderItem = {
         amount: totalAmount,
         items: sessionProducts || [],
         invoice: invoice_data,
       };
 
+      //==============================
+      // 🔥 FIX 3: Save Correctly
+      //==============================
       if (sessionProducts?.length) {
         const userOrdersRef = adminDB
           .collection('users')
@@ -107,7 +119,10 @@ export async function POST(req: any) {
     } catch (error) {
       console.error('Error creating order in Firebase:', error);
       return NextResponse.json(
-        { error: `Error creating order: ${error}`, received: true },
+        {
+          error: `Error creating order: ${error}`,
+          received: true,
+        },
         { status: 400 }
       );
     }

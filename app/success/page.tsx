@@ -61,7 +61,7 @@ const SuccessPage = () => {
     };
 
     handleSuccess();
-  }, [router, resetCart]);
+  }, [router, resetCart, sessionId]);
 
   return (
     <div className="min-h-screen w-full flex justify-center items-center bg-gradient-to-br from-[#e8ecf3] to-[#cdd5df] px-4 py-10 relative overflow-hidden">
