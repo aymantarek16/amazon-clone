@@ -9,6 +9,7 @@ interface StoreType {
   decreaseQuantity: (productId: number) => void;
   removeFromCart: (productId: number) => void;
   resetCart: () => void;
+  
   // favorite
   favoriteProduct: Product[];
   addToFavorite: (product: Product) => Promise<void>;
