@@ -8,7 +8,8 @@ export const POST = async (request: NextRequest) => {
   if (!STRIPE_KEY) throw new Error('Stripe is not initiated');
 
   const stripe = new Stripe(STRIPE_KEY);
-  const NEXT_AUTH_URL = process.env.NEXT_PUBLIC_NEXT_AUTH_URL || 'http://localhost:3000';
+  // const NEXT_AUTH_URL = process.env.NEXT_PUBLIC_NEXT_AUTH_URL || 'http://localhost:3000';
+  const NEXT_AUTH_URL = process.env.NEXT_PUBLIC_NEXT_AUTH_URL || 'https://amazon-clone-zeta-five-13.vercel.app';
 
   const successUrl = `${NEXT_AUTH_URL}/success?session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = `${NEXT_AUTH_URL}/cart`;
