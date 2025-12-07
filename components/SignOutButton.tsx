@@ -69,12 +69,6 @@ const SignOutButton = () => {
           className="absolute top-full right-[-4px] mt-3 w-48 bg-white text-gray-800 rounded-md shadow-2xl z-50 overflow-hidden 
                      opacity-100 transition-opacity duration-300"
         >
-          <a
-            href={"/orders"}
-            className="w-full block p-3 text-sm font-medium hover:bg-gray-100 transition-colors border-t border-gray-100"
-          >
-            Your Orders
-          </a>
 
           <button
             onClick={handleSignOut}
