@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from 'react-icons/fa';
-import { FaFacebook } from 'react-icons/fa';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { redirect } from "next/navigation";
@@ -45,18 +44,6 @@ const LoginPage = async () => {
                 <Button type="submit" variant="outline" className="w-full flex justify-start">
                   <FaGithub className="w-5 h-5 mr-2" />
                   <span>Sign in with GitHub</span>
-                </Button>
-              </form>
-              {/* Facebook Sign in */}
-              <form
-                action={async () => {
-                  "use server"
-                  await signIn("facebook")
-                }}
-              >
-                <Button type="submit" variant="outline" className="w-full flex justify-start">
-                  <FaFacebook className="w-5 h-5 mr-2" />
-                  <span>Sign in with Facebook</span>
                 </Button>
               </form>
             </div>
