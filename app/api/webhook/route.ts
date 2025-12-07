@@ -4,7 +4,8 @@ import Stripe from 'stripe';
 import stripe from '@/lib/stripe';
 import { adminDB } from '@/firebase-admin';
 
-// This line prevents Next.js from pre-rendering this API route during build
+// prevents Next.js from pre-rendering this API route during build
+export const runtime = 'nodejs'; 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
